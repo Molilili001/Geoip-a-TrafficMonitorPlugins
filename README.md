@@ -7,13 +7,7 @@
 
 本仓库用于开源发布「TrafficMonitor GeoIP 插件」。插件可在任务栏显示通过梯子（VPN/代理）上网时的当前出口地区归属（国家代码·城市），并在鼠标提示中显示 IP / 国家 / 城市 / ISP / ASN / 可疑性（是否可能为云厂商/代理）等信息。
 
-当前状态：仓库已包含插件源码、构建脚本、示例配置与 CI 工作流。可直接按构建指南进行编译与使用。
-
-- 插件主实现参考并已迁移到本仓库：
-  - 源码入口：[GeoIP.cpp](src/GeoIP/GeoIP.cpp:1)
-  - 项目文件：[GeoIP.vcxproj](src/GeoIP/GeoIP.vcxproj:1)
-  - 插件接口定义（MIT）：[PluginInterface.h](external/tm-plugin-sdk/include/PluginInterface.h:1)
-
+当前状态：仓库已包含插件源码、dll文件等内容
 ---
 
 ## 功能特性

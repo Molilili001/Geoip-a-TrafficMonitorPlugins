@@ -8,6 +8,20 @@
 本仓库用于开源发布「TrafficMonitor GeoIP 插件」。插件可在任务栏显示通过梯子（VPN/代理）上网时的当前出口地区归属（国家代码·城市），并在鼠标提示中显示 IP / 国家 / 城市 / ISP / ASN / 可疑性（是否可能为云厂商/代理）等信息。
 
 当前状态：仓库已包含插件源码、dll文件等内容
+
+---
+
+## 部署与使用
+
+1. 关闭 TrafficMonitor。
+2. 将 `GeoIP.dll` 复制到 TrafficMonitor 安装目录的 `plugins` 文件夹，例如：
+   - `TrafficMonitor\plugins\GeoIP.dll`
+3. 启动 TrafficMonitor：
+   - 在“插件管理”启用“GeoIP”。
+   - 在“显示设置”勾选“GeoIP”并调整显示位置。
+4. 开启梯子后，任务栏应显示形如 `US·Los Angeles`，鼠标提示包含 IP/ISP/ASN 等信息。
+ps. 本插件支持在主窗口（悬浮球）显示内容，但因为我不会做皮肤所以只能暂时放弃，但是我修改了皮肤10以暂时展示功能
+
 ---
 
 ## 功能特性
@@ -35,20 +49,6 @@
   - 示例文本（用于分配宽度）：[CGeoIPItem::GetItemValueSampleText()](src/GeoIP/GeoIPItem.cpp:22)
 - 插件导出入口（接口对象单例）
   - [TMPluginGetInstance()](src/GeoIP/GeoIP.cpp:360)
-
----
-
-## 部署与使用
-
-1. 关闭 TrafficMonitor。
-2. 将 `GeoIP.dll` 复制到 TrafficMonitor 安装目录的 `plugins` 文件夹，例如：
-   - `TrafficMonitor\plugins\GeoIP.dll`
-3. 启动 TrafficMonitor：
-   - 在“插件管理”启用“GeoIP”。
-   - 在“显示设置”勾选“GeoIP”并调整显示位置。
-4. 开启梯子后，任务栏应显示形如 `US·Los Angeles`，鼠标提示包含 IP/ISP/ASN 等信息。
-
-ps. 本插件支持在主窗口（悬浮球）显示内容，但因为我不会做皮肤所以只能暂时放弃，但是我修改了皮肤10以暂时展示功能
 
 
 ---

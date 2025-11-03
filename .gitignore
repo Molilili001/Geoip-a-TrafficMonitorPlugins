@@ -1,0 +1,46 @@
+# Visual Studio / C++ typical ignores
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+ipch/
+*.opendb
+
+# Build intermediates
+*.obj
+*.o
+*.idb
+*.pdb
+*.ilk
+*.tlog
+*.log
+*.cache
+*.tmp
+*.lastbuildstate
+
+# Binaries and libraries
+*.dll
+*.lib
+*.exp
+*.exe
+
+# Output directories
+bin/
+Build/
+build/
+Debug/
+Release/
+x64/
+Win32/
+ARM64/
+ARM64EC/
+
+# Generated files
+*.generated.*
+*.rsp
+
+# Misc
+Thumbs.db
+desktop.ini

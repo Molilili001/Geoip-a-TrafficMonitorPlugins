@@ -1,0 +1,20 @@
+
+; GeoIP.ini — TrafficMonitor GeoIP 插件配置示例
+; 放置路径：主程序在启动时通过扩展信息传入配置目录（EI_CONFIG_DIR），插件读取同目录下的 GeoIP.ini
+; 目录位置由 portable_mode 决定，参考：
+; - 当 portable_mode=false：C:\Users\<用户名>\AppData\Roaming\TrafficMonitor\
+; - 当 portable_mode=true ：TrafficMonitor 程序所在目录（与 TrafficMonitor.exe 同级）
+; 说明参考文档：
+; - 配置存放位置：[配置和数据文件.md](TrafficMonitor.wiki/配置和数据文件.md:41)
+; - 插件读取位置：[CGeoIP::OnExtenedInfo()](TrafficMonitorPlugins-IpAddress_V1.00/Plugins/GeoIP/GeoIP.cpp:242)
+; - 刷新间隔持久化：[CGeoIP::DataRequired()](TrafficMonitorPlugins-IpAddress_V1.00/Plugins/GeoIP/GeoIP.cpp:196)
+; - 模板格式化：[utilities::StringHelper::StringFormat()](TrafficMonitorPlugins-IpAddress_V1.00/utilities/Common.h:35)
+; - 模板参数：<%1%>=countryCode（国家二字码），<%2%>=city（城市）
+
+[config]
+; 刷新间隔（秒），范围 15–600，默认 30
+interval_sec=30
+
+; 显示模板（仅支持参数 <%1%> 和 <%2%>）
+; 默认：<%1%>·<%2%>  →  US·Los Angeles
+; 示例1

@@ -44,6 +44,20 @@
 
 ---
 
+## 部署与使用
+
+1. 关闭 TrafficMonitor。
+2. 将 `GeoIP.dll` 复制到 TrafficMonitor 安装目录的 `plugins` 文件夹，例如：
+   - `TrafficMonitor\plugins\GeoIP.dll`
+3. 启动 TrafficMonitor：
+   - 在“插件管理”启用“GeoIP”。
+   - 在“显示设置”勾选“GeoIP”并调整显示位置。
+4. 开启梯子后，任务栏应显示形如 `US·Los Angeles`，鼠标提示包含 IP/ISP/ASN 等信息。
+ps. 本插件支持在主窗口（悬浮球）显示内容，但因为我不会做皮肤所以只能暂时放弃，但是我修改了皮肤10以暂时展示功能
+
+
+---
+
 ## 兼容性与要求
 
 - 平台：Windows 10/11 x64（Win32/ARM64EC 亦可构建）
@@ -86,18 +100,6 @@
 
 命令行（用于 CI 或本地批量构建）：
 - `msbuild .\src\GeoIP\GeoIP.vcxproj /p:Configuration=Release /p:Platform=x64 /m`
-
----
-
-## 部署与使用
-
-1. 关闭 TrafficMonitor。
-2. 将 `GeoIP.dll` 复制到 TrafficMonitor 安装目录的 `plugins` 文件夹，例如：
-   - `TrafficMonitor\plugins\GeoIP.dll`
-3. 启动 TrafficMonitor：
-   - 在“插件管理”启用“GeoIP”。
-   - 在“显示设置”勾选“GeoIP”并调整显示位置。
-4. 开启梯子后，任务栏应显示形如 `US·Los Angeles`，鼠标提示包含 IP/ISP/ASN 等信息。
 
 ---
 

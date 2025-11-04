@@ -1,5 +1,5 @@
 # Geoip-a-TrafficMonitorPlugins
-一个用于 [TrafficMonitor()](https://github.com/zhongyang219/TrafficMonitor) 的 IP 显示插件
+一个用于 [TrafficMonitor](https://github.com/zhongyang219/TrafficMonitor) 的 IP 显示插件
 
 ---
 

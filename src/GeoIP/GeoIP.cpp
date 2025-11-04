@@ -134,10 +134,16 @@ static bool contains_any_icase(const std::wstring& hay, const std::initializer_l
     return false;
 }
 
-bool CGeoIP::FetchViaIpApi() {
-    // ip-api.com/json
+bool CGeoIP::FetchViaIpApi(const std::wstring& ip_override) {
+    // ip-api.com/json or ip-api.com/json/{ip}
     std::string body;
-    std::wstring url = L"http://ip-api.com/json?fields=status,country,countryCode,regionName,city,isp,org,as,query";
+    std::wstring url;
+    if (!ip_override.empty()) {
+        // 当提供了明确的 IPv4 地址时，查询该地址的归属，避免因访问协议族（v6/v4）不同导致出口地址不一致
+        url = L"http://ip-api.com/json/" + ip_override + L"?fields=status,country,countryCode,regionName,city,isp,org,as,query";
+    } else {
+        url = L"http://ip-api.com/json?fields=status,country,countryCode,regionName,city,isp,org,as,query";
+    }
     url += L"&t=" + std::to_wstring(static_cast<unsigned long long>(time(nullptr)));
     if (!CGeoHttp::GetURL(url, body, L"TrafficMonitor/GeoIP")) return false;
 
@@ -203,6 +209,41 @@ bool CGeoIP::FetchViaIpInfo() {
     return true;
 }
 
+bool CGeoIP::FetchIPv4Address(std::wstring& out_ip) {
+    // 仅获取 IPv4 出口地址，避免由于协议族不同（IPv6/IPv4）导致地理归属差异
+    auto is_ipv4 = [](const std::wstring& s) -> bool {
+        if (s.empty() || s.size() < 7 || s.size() > 15) return false;
+        int dots = 0;
+        for (wchar_t ch : s) {
+            if (ch == L'.') dots++;
+            else if (ch < L'0' || ch > L'9') return false;
+        }
+        return dots == 3;
+    };
+    auto try_url = [&](const std::wstring& url) -> bool {
+        std::string body;
+        if (!CGeoHttp::GetURL(url, body, L"TrafficMonitor/GeoIP")) return false;
+        std::wstring s = CGeoHttp::StrToUnicode(body.c_str(), true);
+        utilities::StringHelper::StringNormalize(s);
+        // 去除常见的换行与空白
+        utilities::StringHelper::StringReplace(s, L"\r", L"");
+        utilities::StringHelper::StringReplace(s, L"\n", L"");
+        utilities::StringHelper::StringNormalize(s);
+        if (!is_ipv4(s)) return false;
+        out_ip = s;
+        return true;
+    };
+
+    // 依次尝试多个 IPv4-only 端点
+    if (try_url(L"http://api-ipv4.ip.sb/ip") ||
+        try_url(L"http://ipv4.icanhazip.com") ||
+        try_url(L"http://v4.ident.me"))
+    {
+        return true;
+    }
+    return false;
+}
+
 bool CGeoIP::FetchViaPconline() {
     // whois.pconline.com.cn/ip.jsp 返回简体中文地区，如“广东省深圳市”
     std::string body;
@@ -211,7 +252,8 @@ bool CGeoIP::FetchViaPconline() {
     if (!CGeoHttp::GetURL(url, body, L"TrafficMonitor/GeoIP")) return false;
 
     // 去除可能的换行和空白
-    std::wstring cn = CGeoHttp::StrToUnicode(body.c_str(), false);
+    // pconline 返回内容为中文，经过 GetURL 已统一转换为 UTF-8，这里必须按 UTF-8 解码
+    std::wstring cn = CGeoHttp::StrToUnicode(body.c_str(), true);
     utilities::StringHelper::StringNormalize(cn);
 
     m_geo.countryCode = L"CN";
@@ -227,12 +269,34 @@ void CGeoIP::DataRequired() {
     if (!ShouldUpdate()) return;
 
     bool ok = false;
-    // 优先 ip-api.com
-    ok = FetchViaIpApi();
+
+    // 优先：当配置启用时，按 IPv4 出口地址进行地理查询，避免因浏览器/系统代理在 IPv6 上的不同路由导致结果差异
+    if (m_prefer_ipv4) {
+        std::wstring v4_ip;
+        if (FetchIPv4Address(v4_ip)) {
+            ok = FetchViaIpApi(v4_ip);
+        }
+    }
+
+    // 其次：按默认路径获取（依赖数据源自动判定）
+    if (!ok) ok = FetchViaIpApi();
+
+    // 回退路径
     if (!ok) ok = FetchViaIpInfo();
     if (!ok) ok = FetchViaPconline();
 
-    m_last_update = time(nullptr);
+    // 成功时才更新时间戳；失败时设置短回退重试窗口，避免长时间显示旧IP
+    if (ok) {
+        m_last_update = time(nullptr);
+    } else {
+        // 失败时约5秒后重试（不改变全局配置，仅调整时间判定）
+        time_t now = time(nullptr);
+        int retry_in = 5;
+        if (retry_in >= m_interval_sec) retry_in = m_interval_sec - 1; // 保证小于间隔
+        if (retry_in < 1) retry_in = 1;
+        m_last_update = now - m_interval_sec + retry_in;
+    }
+
     ComposeTexts();
 
     // 持久化刷新间隔（固定写到 plugins 目录）
@@ -291,7 +355,9 @@ void CGeoIP::OnExtenedInfo(ExtendedInfoIndex index, const wchar_t* data) {
 
         // 读取命令模式（0=遵照配置，1=国家代码·城市，2=仅IP，3=国家代码·城市·IP）
         m_command_mode = ini.GetInt(L"config", L"command_mode", 0);
-
+        // IPv4 优先策略（默认启用，以便与 ip.sb 的 v4 结果更一致）
+        m_prefer_ipv4 = ini.GetBool(L"config", L"prefer_ipv4", true);
+        
         // 应用命令模式到当前显示模板
         ApplyCommandMode();
     }

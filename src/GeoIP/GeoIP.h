@@ -48,9 +48,11 @@ private:
     void ApplyCommandMode();
 
     // Data sources
-    bool FetchViaIpApi();         // ip-api.com/json
+    bool FetchViaIpApi(const std::wstring& ip_override = L""); // ip-api.com/json or json/{ip}
     bool FetchViaIpInfo();        // ipinfo.io/json
     bool FetchViaPconline();      // whois.pconline.com.cn/ip.jsp (CN fallback)
+    bool FetchIPv4Address(std::wstring& out_ip); // ipv4-only address (icanhazip/ident.me)
+    bool FetchIPv6Address(std::wstring& out_ip); // ipv6-only address (ip.sb/icanhazip/ident.me)
 
     static CGeoIP m_instance;
     CGeoIPItem* m_item_ptr{nullptr};
@@ -69,6 +71,10 @@ private:
     std::wstring m_display_template_config{L"<%1%>·<%2%>"};
     // command mode: 0=遵照配置, 1=国家代码·城市, 2=仅IP, 3=国家代码·城市·IP
     int m_command_mode{0};
+    // prefer IPv4 path when resolving exit IP
+    bool m_prefer_ipv4{false};
+    // prefer IPv6 path when resolving exit IP
+    bool m_prefer_ipv6{false};
     
     // config directory (from EI_CONFIG_DIR)
     std::wstring m_config_dir;
